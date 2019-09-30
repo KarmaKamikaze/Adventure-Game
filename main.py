@@ -5,6 +5,9 @@
 import random
 from time import sleep
 import os
+import dice
+
+# quick commands
 
 def clear():
     #os.system('cls')    # clears screen on Windows
@@ -15,6 +18,58 @@ def pressToContinue():
         input("Press Enter to continue...")
     except SyntaxError:
         pass
+
+# character configuration
+
+def character():
+    print("Use your favorite point-buy website, or roll 4d6 (keep the three highest values)")
+    sleep(3)
+    character.strength = int(input("Input your Strength score: ").strip())
+    character.dexterity = int(input("Input your Dexterity score: ").strip())
+    character.constitution = int(input("Input your Constitution score: ").strip())
+    character.intelligence = int(input("Input your Intelligence score: ").strip())
+    character.wisdom = int(input("Input your Wisdom score: ").strip())
+    character.charisma = int(input("Input your Charisma score: ").strip())
+    character.health = int(8 + ((character.constitution - 10) / 2))
+    #character.rangedAttack =
+    #character.meleeAttack =
+
+def randomCharacter():
+    character.strength = int(dice.roll('3d6'))
+    character.dexterity = int(dice.roll('3d6'))
+    character.constitution = int(dice.roll('3d6'))
+    character.intelligence = int(dice.roll('3d6'))
+    character.wisdom = int(dice.roll('3d6'))
+    character.charisma = int(dice.roll('3d6'))
+    character.health = int(8 + ((character.constitution - 10) / 2))
+    #character.rangedAttack =
+    #character.meleeAttack =
+
+
+# game start
+
+def gameStart():
+    clear()
+    ranChar = input("Would you like roll up a character with random stats? (yes or y to skip): ").lower().strip()
+    if ranChar == "yes" or ranChar == "y":
+        clear()
+        randomCharacter()
+        print("Strength: " + str(character.strength))
+        print("Dexterity: " + str(character.dexterity))
+        print("Constitution: " + str(character.constitution))
+        print("Intelligence: " + str(character.intelligence))
+        print("Wisdom: " + str(character.charisma))
+        print("Charisma: " + str(character.charisma))
+        print("Your max HP is " + str(character.health) + "\n")
+    else:
+        clear()
+        character()
+        print("Your max HP is " + str(character.health) + "\n")
+    skipStart = input("Would you like to skip the adventure intro? (yes or y to skip): ").lower().strip()
+    if skipStart == "yes" or skipStart == "y":
+        adventureBegins()
+    else:
+        displayIntro()
 
 def displayIntro():
     clear()
@@ -64,6 +119,8 @@ def displayIntro():
     print("- Incompetent Fools -\n")
     print("“I can find your boy,” you hear yourself saying.\n\nThe woman looks up, and new hope begins to shine from her eyes.\n\n“Oh Gods,” she says, her voice quavering.\n“We’ll give you anything, anything...”\n\nThe old man is a little more practical.\n\n“If I was a few decades younger, I’d be out there myself.\nI saw action in the Battle of Tanglefork, when we freed the Vale from Rensha rule.”\n\nYou nod appreciatively – that battle happened about 30 years ago,\nand was said to be fierce. You are not surprised – Elric Brewmont definitely\ncarries himself like an old veteran.\n\n“I can’t put my sword forward any more, but I can offer you gold, my friend...\n2000 pieces of it, to be exact...”\n\n")
     pressToContinue()
+
+# adventure start
 
 def adventureBegins():
     clear()
@@ -183,6 +240,5 @@ def shootAfter():
 
 playAgain = "yes"
 while playAgain == "yes" or playAgain == "y":
-    displayIntro()
-    adventureBegins()
+    gameStart()
     playAgain = input("You you want to play again? (yes or y to continue playing): ")
