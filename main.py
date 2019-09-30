@@ -6,6 +6,7 @@ import random
 from time import sleep
 import os
 import dice
+from npc import (giantCentipede, cultist)
 
 # quick commands
 
