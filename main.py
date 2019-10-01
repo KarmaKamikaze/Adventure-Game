@@ -16,7 +16,7 @@ def clear():
 
 def pressToContinue():
     try:
-        input("Press Enter to continue...")
+        input("\x1B[3mPress Enter to continue...\x1B[23m")
     except SyntaxError:
         pass
 
@@ -106,7 +106,7 @@ def displayIntro():
     clear()
     print("BACKSTORY")
     print("- Arrival in Orlbar -\n")
-    print("“Yes? What is it?” the elderly gentleman asks directly.\nYou straighten yourself up, peering into the room.\n\n“I was wondering what all the noise was about,” you say, although now you\ndon’t feel quite so annoyed.\n\n“I could hear the crying from next door. I was wondering,” you say gruffly,\nnot used to dealing with aristocrats,“If it’s anything I can help you with?\nPerhaps then we can all get some rest?”\n\nAt this the woman looks up and sees you. You probably look a fright,\nafter all those weeks on the road – ungroomed, hair dishevelled, travel-worn clothes -\nbut you’ve had a bath so you at least you don’t smell bad.\nHowever, your type has an... air about them.\nYou’ve seen a fight or two and knowhow to handle yourself in most situations.\nYou’re what’s known in these parts as ‘the adventuring type.’\nSuch types generally know how to get things done, things that others might shy away from.\n\n“Show our guest in, Elric,” the woman says weakly,\ndrying her tears with a silk handkerchief.\n\n")
+    print("“Yes? What is it?” the elderly gentleman asks directly.\nYou straighten yourself up, peering into the room.\n\n“I was wondering what all the noise was about,” you say, although now you\ndon’t feel quite so annoyed.\n\n“I could hear the crying from next door. I was wondering,” you say gruffly,\nnot used to dealing with aristocrats,“If it’s anything I can help you with?\nPerhaps then we can all get some rest?”\n\nAt this the woman looks up and sees you. You probably look a fright,\nafter all those weeks on the road – ungroomed, hair dishevelled, travel-worn clothes -\nbut you’ve had a bath so you at least you don’t smell bad.\nHowever, your type has an... air about them.\nYou’ve seen a fight or two and know how to handle yourself in most situations.\nYou’re what’s known in these parts as ‘the adventuring type.’\nSuch types generally know how to get things done, things that others might shy away from.\n\n“Show our guest in, Elric,” the woman says weakly,\ndrying her tears with a silk handkerchief.\n\n")
     pressToContinue()
     clear()
     print("BACKSTORY")
@@ -117,7 +117,7 @@ def displayIntro():
     clear()
     print("BACKSTORY")
     print("- The Mysterious Knight -\n")
-    print("“Hmm,” you say, mulling over this information. “Did he seem familiar, this knight?”\n\nElric shakes his head.\n\n“I know what you’re thinking. Wealthy aristocrat, on holiday from Loudwater,\nsomeone must have known we were coming out here, and siezed the opportunity.\nIt’s true, I am what you would call... a public figure.\nIt is well known, in Loudwater at least, that I am a wealthy man.\nBut no.... this knight was something else.\nWe didn’t see his face, it was hidden by a great metal visor.\nA towering warrior he was, a hulk of a man.”\n\nLady Brewmont speaks again.\n\n“And he has kidnapped our poor little Darek! Abducted him, just ripped him out of our grasp!”\n\n")
+    print("“Hmm,” you say, mulling over this information. “Did he seem familiar, this knight?”\n\nElric shakes his head.\n\n“I know what you’re thinking. Wealthy aristocrat, on holiday from Loudwater,\nsomeone must have known we were coming out here, and seized the opportunity.\nIt’s true, I am what you would call... a public figure.\nIt is well known, in Loudwater at least, that I am a wealthy man.\nBut no.... this knight was something else.\nWe didn’t see his face, it was hidden by a great metal visor.\nA towering warrior he was, a hulk of a man.”\n\nLady Brewmont speaks again.\n\n“And he has kidnapped our poor little Darek! Abducted him, just ripped him out of our grasp!”\n\n")
     pressToContinue()
     clear()
     print("BACKSTORY")
@@ -218,7 +218,7 @@ def keepGoing():
             shootAfter()
             break
         elif choice == "deadnelly":
-            # deadNelly() FIX THIS ENTRY
+            deadNelly()
             break
         else:
             choice = input("That is not a valid path. Choose either SHOOTAFTER or DEADNELLY: ").lower().strip()
@@ -228,31 +228,59 @@ def shootAfter():
     print("- SHOOTAFTER -\n")
     sleep(2)
     print("Your target is about 100ft away. You lift your weapon,\ntaking a quick assessment of the conditions, and fire.\n\n\n")
-    print("\x1B[3mMake a ranged attack at whatever is fleeing from you.\x1B[3m\n")
+    print("\x1B[3mMake a ranged attack at whatever is fleeing from you.\x1B[23m\n")
     try:
-        input("Press Enter to SHOOT!")
+        input("\x1B[3mPress Enter to SHOOT!\x1B[23m")
     except SyntaxError:
         pass
     clear()
     sleep(1)
-    print(".")
+    print("Rolling.")
     sleep(1)
     clear()
-    print("..")
+    print("Rolling..")
     sleep(1)
     clear()
-    print("...\n\n")
+    print("Rolling...\n\n")
 
-    shootAfterShot = random.randint(0, 5)
-    if shootAfterShot == 5:
-        print("Miss!")
-        sleep(2)
-        miss()
-    else:
-        print("Hit!")
+    nellyAC = int(17)
+    characterAttack()
+    shootAfterShot = character.rangedAttackToHit
+    if shootAfterShot >= nellyAC:
+        print("\x1B[3mHit!\x1B[23m")
         sleep(2)
         goodShot()
+    else:
+        print("\x1B[3mMiss!\x1B[23m")
+        sleep(2)
+        miss()
 
+def goodShot():
+    clear()
+    print("- GOODSHOT -\n")
+    sleep(2)
+    print("You hear your arrow make its mark, and hear a cry of pain –\ndefinitely not human, you know that much.\n\nHowever, the creature hardly slows, and soon it is out of sight,\ndisappeared within the dark green of Weathercote Wood.\n\n\n")
+    pressToContinue()
+    deadNelly()
+
+def miss():
+    clear()
+    print("- MISS -\n")
+    sleep(2)
+    print("You watch the black shape scurry away, back into the cover of\nWeathercote Wood, and curse your poor aim.\n\nThen you walk forward to where the creature had been before\nyou startled it and sent it running for the trees.\n\n\n")
+    pressToContinue()
+    deadNelly()
+
+def deadNelly():
+    clear()
+    print("- DEADNELLY -\n")
+    sleep(2)
+    print("You walk forward to where the beast had been before, making all\nthat noise that woke you. There, twitching in its death throes,\nis the horse you rode from Orlbar. Gritting your teeth in anger,\nyou take out your weapon and quickly put the poor beast out of its misery.\n\nThe first rays of dawn begin to creep into the sky.\nWith a sigh of resignation, you wipe the horse’s blood from your weapon\nand begin the trek towards the wood’s edge. The morning is peaceful,\nin contrast to the savagery you have just witnessed, and a chorus\nof birds greet the dawn with calls that echo off the low hills\nof the surrounding landscape. As you near Weathercote Wood and can see down\nthe single path that leads into its depths, you see that little light\nseems to penetrate in through the canopy. Night still hides beneath\nthe mossy boughs and dark green vines that thread the ancient trees together.\n\nYou step onto the path and enter Weathercote Wood...\nwho knows what fate awaits you within these shadowed depths...\n\n\n")
+    try:
+        input("\x1B[3mPress Enter to enter Weathercote Wood!\x1B[23m")
+    except SyntaxError:
+        pass
+    locationOne()
 
 playAgain = "yes"
 while playAgain == "yes" or playAgain == "y":
