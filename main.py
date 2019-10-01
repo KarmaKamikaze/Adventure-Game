@@ -25,17 +25,27 @@ def pressToContinue():
 def character():
     print("Use your favorite point-buy website, or roll 4d6 (keep the three highest values)")
     sleep(3)
-    character.strength = int(input("Input your Strength score: ").strip())
-    character.dexterity = int(input("Input your Dexterity score: ").strip())
-    character.constitution = int(input("Input your Constitution score: ").strip())
-    character.intelligence = int(input("Input your Intelligence score: ").strip())
-    character.wisdom = int(input("Input your Wisdom score: ").strip())
-    character.charisma = int(input("Input your Charisma score: ").strip())
-    character.health = int(8 + ((character.constitution - 10) / 2))
-    #character.rangedAttack =
-    #character.meleeAttack =
+    character.name = input("What is the name of your character?: ").title()
+    try:
+        character.strength = int(input("Input your Strength score: ").strip())
+        character.dexterity = int(input("Input your Dexterity score: ").strip())
+        character.constitution = int(input("Input your Constitution score: ").strip())
+        character.intelligence = int(input("Input your Intelligence score: ").strip())
+        character.wisdom = int(input("Input your Wisdom score: ").strip())
+        character.charisma = int(input("Input your Charisma score: ").strip())
+        character.health = int(8 + ((character.constitution - 10) / 2))
+        print("\nWell met, " + character.name + "!")
+        print("Your max HP is " + str(character.health) + "\n")
+    except ValueError:
+        clear()
+        print("Error:")
+        print("That's not a number!")
+        sleep(3)
+        clear()
+        character()
 
 def randomCharacter():
+    character.name = input("What is the name of your character?: ").title()
     character.strength = int(dice.roll('3d6'))
     character.dexterity = int(dice.roll('3d6'))
     character.constitution = int(dice.roll('3d6'))
@@ -43,8 +53,21 @@ def randomCharacter():
     character.wisdom = int(dice.roll('3d6'))
     character.charisma = int(dice.roll('3d6'))
     character.health = int(8 + ((character.constitution - 10) / 2))
-    #character.rangedAttack =
-    #character.meleeAttack =
+    print("Strength: " + str(character.strength))
+    print("Dexterity: " + str(character.dexterity))
+    print("Constitution: " + str(character.constitution))
+    print("Intelligence: " + str(character.intelligence))
+    print("Wisdom: " + str(character.charisma))
+    print("Charisma: " + str(character.charisma))
+    print("\nWell met, " + character.name + "!")
+    print("Your max HP is " + str(character.health) + "\n")
+
+def characterAttack():
+    character.strMod = int((character.strength - 10) / 2)
+    character.dexMod = int((character.dexterity - 10) / 2)
+    character.meleeAttackToHit = int(dice.roll('1d20')) + 2 + character.strMod
+    character.rangedAttackToHit = int(dice.roll('1d20')) + 2 + character.dexMod
+
 
 
 # game start
@@ -55,17 +78,9 @@ def gameStart():
     if ranChar == "yes" or ranChar == "y":
         clear()
         randomCharacter()
-        print("Strength: " + str(character.strength))
-        print("Dexterity: " + str(character.dexterity))
-        print("Constitution: " + str(character.constitution))
-        print("Intelligence: " + str(character.intelligence))
-        print("Wisdom: " + str(character.charisma))
-        print("Charisma: " + str(character.charisma))
-        print("Your max HP is " + str(character.health) + "\n")
     else:
         clear()
         character()
-        print("Your max HP is " + str(character.health) + "\n")
     skipStart = input("Would you like to skip the adventure intro? (yes or y to skip): ").lower().strip()
     if skipStart == "yes" or skipStart == "y":
         adventureBegins()
