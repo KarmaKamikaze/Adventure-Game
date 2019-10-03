@@ -20,6 +20,13 @@ def pressToContinue():
     except SyntaxError:
         pass
 
+# tracking
+
+stealthPoints = 0
+
+stealthQuotes = ['You feel rather sneaky.', 'You are one with the shadows.', 'Non shall see you pass.']
+
+
 # character configuration
 
 def character():
@@ -62,12 +69,20 @@ def randomCharacter():
     print("\nWell met, " + character.name + "!")
     print("Your max HP is " + str(character.health) + "\n")
 
-def characterAttack():
+def characterAbility():
+    character.AC = int(15)
     character.strMod = int((character.strength - 10) / 2)
     character.dexMod = int((character.dexterity - 10) / 2)
-    character.meleeAttackToHit = int(dice.roll('1d20')) + 2 + character.strMod
-    character.rangedAttackToHit = int(dice.roll('1d20')) + 2 + character.dexMod
-
+    character.conMod = int((character.constitution - 10) / 2)
+    character.intMod = int((character.intelligence - 10) / 2)
+    character.wisMod = int((character.wisdom - 10) / 2)
+    character.chaMod = int((character.charisma - 10) / 2)
+    character.perception = int(dice.roll('1d20')) + 3 + character.wisMod
+    character.stealth = int(dice.roll('1d20')) + 3 + character.dexMod
+    character.meleeAttackToHit = int(dice.roll('1d20')) + 3 + character.strMod
+    character.meleeAttackDamage = int(dice.roll('2d6')) + 3 + character.strMod
+    character.rangedAttackToHit = int(dice.roll('1d20')) + 3 + character.dexMod
+    character.rangedAttackDamage = int(dice.roll('1d8')) + 3 + character.dexMod
 
 
 # game start
@@ -86,6 +101,7 @@ def gameStart():
         adventureBegins()
     else:
         displayIntro()
+        adventureBegins()
 
 def displayIntro():
     clear()
@@ -136,6 +152,7 @@ def displayIntro():
     print("“I can find your boy,” you hear yourself saying.\n\nThe woman looks up, and new hope begins to shine from her eyes.\n\n“Oh Gods,” she says, her voice quavering.\n“We’ll give you anything, anything...”\n\nThe old man is a little more practical.\n\n“If I was a few decades younger, I’d be out there myself.\nI saw action in the Battle of Tanglefork, when we freed the Vale from Rensha rule.”\n\nYou nod appreciatively – that battle happened about 30 years ago,\nand was said to be fierce. You are not surprised – Elric Brewmont definitely\ncarries himself like an old veteran.\n\n“I can’t put my sword forward any more, but I can offer you gold, my friend...\n2000 pieces of it, to be exact...”\n\n")
     pressToContinue()
 
+
 # adventure start
 
 def adventureBegins():
@@ -158,8 +175,7 @@ def adventureBegins():
             choice = input("That is not a valid path. Choose either BREWSKI or KEEPGOING: ").lower().strip()
 
 
-
-# Adventure entries below:
+# pre weathercote wood entries:
 
 def brewski():
     clear()
@@ -244,7 +260,7 @@ def shootAfter():
     print("Rolling...\n\n")
 
     nellyAC = int(17)
-    characterAttack()
+    characterAbility()
     shootAfterShot = character.rangedAttackToHit
     if shootAfterShot >= nellyAC:
         print("\x1B[3mHit!\x1B[23m")
@@ -282,7 +298,119 @@ def deadNelly():
         pass
     locationOne()
 
+
+# weathercote wood locations
+
+def locationOne():
+    clear()
+    print("WEATHERCOTE WOOD")
+    print("- Location One -\n")
+    sleep(2)
+    print("You move ahead, deeper into the wood, and it almost seems\nas if the trees themselves are watching your progress.\nIndeed, as you go on, you really do get the feeling you are being watched.\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mYou can move with stealth. Make a stealth check, if you wish by typing STEALTH.\nYou can check for traps: Roll perception by typing TRAP.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")   # If you succeed the stealth check, you may add 10 points to any d100 chance rolls you make while on this Location.
+
+    stealthCheck = 0
+    perceptionCheck = 0
+
+    choice = input("What do you wish to do? (STEALTH, TRAP or CONTINUE): ").lower().strip()
+    while stealthCheck == 0 and perceptionCheck == 0:
+        if choice == "stealth":
+            stealthCheck = 1
+            locationOneStealth()
+            break
+        elif choice == "trap":
+            perceptionCheck = 1
+            locationOneTrap()
+            break
+        elif choice == "continue":
+            break
+        else:
+            choice = input("That is not a valid option. Choose either STEALTH, TRAP or CONTINUE: ").lower().strip()
+
+    while stealthCheck == 1 and perceptionCheck == 0:
+        clear()
+        print("OPTIONS:")
+        print("\x1B[3mYou can check for traps: Roll perception by typing TRAP.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
+        if choice == "trap":
+            perceptionCheck = 1
+            locationOneTrap()
+            break
+        elif choice == "continue":
+            break
+        else:
+            choice = input("That is not a valid option. Choose either TRAP or CONTINUE: ").lower().strip()
+
+    while stealthCheck == 0 and perceptionCheck == 1:
+        clear()
+        print("OPTIONS:")
+        print("\x1B[3mYou can move with stealth. Make a stealth check, if you wish by typing STEALTH.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
+        if choice == "stealth":
+            stealthCheck = 1
+            locationOneStealth()
+            break
+        elif choice == "continue":
+            break
+        else:
+            choice = input("That is not a valid option. Choose either STEALTH or CONTINUE: ").lower().strip()
+    quietEntry()
+
+def locationOneStealth():
+    stealthDC = int(12)
+    characterAbility()
+    if character.stealth >= stealthDC:
+        stealthReward = int(stealthPoints + 10)
+        print("\n" + random.choice(stealthQuotes) + "\n\n\n")
+        pressToContinue()
+    else:
+        print("\n" + random.choice(stealthQuotes) + "\n\n\n")
+        pressToContinue()
+
+def locationOneTrap():
+    trapDC = int(12)
+    characterAbility()
+    if character.perception >= trapDC:
+        checkSuccess()
+    else:
+        trapFail()
+
+def checkSuccess():
+    clear()
+    print("- CHECKSUCCESS -\n")
+    sleep(2)
+    print("You search carefully around, but see nothing to indicate any traps are set here.\n\n\n")
+    pressToContinue()
+
+def trapFail():
+    clear()
+    print("- TRAPFAIL -\n")
+    sleep(2)
+    print("You search around but are unable to locate anything resembling a trap.\n\n\n")
+    pressToContinue()
+
+def quietEntry():
+    clear()
+    print("- QUIETENTRY -\n")
+    sleep(2)
+    print("You pause for a second, thinking you heard something.\n\nBut no, it was just some bird flapping off out of cover.\nYou watch it rise into the canopy and then look around at the three paths that lead off from here.\n\n\n")
+    print("\x1B[3mYou are ready to move in the direction you desire.\x1B[23m\n")
+    choice = input("Which path will you choose? (LEFT, RIGHT or AHEAD): ").lower().strip()
+    while True:
+        if choice == "left":
+            shootAfter()
+            break
+        elif choice == "right":
+            shootAfter()
+            break
+        elif choice == "deadnelly":
+            deadNelly()
+            break
+        else:
+            choice = input("That is not a valid path. Choose either LEFT, RIGHT or AHEAD: ").lower().strip()
+
+
 playAgain = "yes"
 while playAgain == "yes" or playAgain == "y":
     gameStart()
-    playAgain = input("You you want to play again? (yes or y to continue playing): ")
+    playAgain = input("Do you want to play again? (yes or y to continue playing): ")
