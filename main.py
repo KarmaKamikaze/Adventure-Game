@@ -311,17 +311,17 @@ def locationOne():
     print("OPTIONS:")
     print("\x1B[3mYou can move with stealth. Make a stealth check, if you wish by typing STEALTH.\nYou can check for traps: Roll perception by typing TRAP.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")   # If you succeed the stealth check, you may add 10 points to any d100 chance rolls you make while on this Location.
 
-    stealthCheck = 0
-    perceptionCheck = 0
+    stealthCheck = False
+    perceptionCheck = False
 
     choice = input("What do you wish to do? (STEALTH, TRAP or CONTINUE): ").lower().strip()
-    while stealthCheck == 0 and perceptionCheck == 0:
+    while stealthCheck is False and perceptionCheck is False:
         if choice == "stealth":
-            stealthCheck = 1
+            stealthCheck = True
             locationOneStealth()
             break
         elif choice == "trap":
-            perceptionCheck = 1
+            perceptionCheck = True
             locationOneTrap()
             break
         elif choice == "continue":
@@ -329,12 +329,12 @@ def locationOne():
         else:
             choice = input("That is not a valid option. Choose either STEALTH, TRAP or CONTINUE: ").lower().strip()
 
-    while stealthCheck == 1 and perceptionCheck == 0:
+    while stealthCheck is True and perceptionCheck is False:
         clear()
         print("OPTIONS:")
         print("\x1B[3mYou can check for traps: Roll perception by typing TRAP.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
         if choice == "trap":
-            perceptionCheck = 1
+            perceptionCheck = True
             locationOneTrap()
             break
         elif choice == "continue":
@@ -342,12 +342,12 @@ def locationOne():
         else:
             choice = input("That is not a valid option. Choose either TRAP or CONTINUE: ").lower().strip()
 
-    while stealthCheck == 0 and perceptionCheck == 1:
+    while stealthCheck is False and perceptionCheck is True:
         clear()
         print("OPTIONS:")
         print("\x1B[3mYou can move with stealth. Make a stealth check, if you wish by typing STEALTH.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
         if choice == "stealth":
-            stealthCheck = 1
+            stealthCheck = True
             locationOneStealth()
             break
         elif choice == "continue":
@@ -398,17 +398,128 @@ def quietEntry():
     choice = input("Which path will you choose? (LEFT, RIGHT or AHEAD): ").lower().strip()
     while True:
         if choice == "left":
-            shootAfter()
+            locationThree()
             break
         elif choice == "right":
-            shootAfter()
+            locationTwo()
             break
-        elif choice == "deadnelly":
-            deadNelly()
+        elif choice == "ahead":
+            locationFive()
             break
         else:
             choice = input("That is not a valid path. Choose either LEFT, RIGHT or AHEAD: ").lower().strip()
 
+def locationTwo():
+    clear()
+    print("WEATHERCOTE WOOD")
+    print("- Location Two -\n")
+    sleep(2)
+    print("The track bends to the southeast, and you follow it,\nall light from the forest entrance now disappearing.\nIt is like night still hides in here.\nOnly the faintest light seeps in through the canopy.\n\nAhead, you see something white and whispy spanning the path. COBWEBS!\nSlowly, you edge forward...")
+
+    print("OPTIONS:")
+    print("\x1B[3mMoving with stealth? Make a stealth check, by typing STEALTH.\nChecking for traps? Roll perception by typing TRAP.\nWant to go back to the previous location? Type RETURN.\nIf you just wish to continue forward, type CONTINUE.\x1B[23m\n")   # If you succeed the stealth check, you may add 10 points to any d100 chance rolls you make while on this Location.
+
+    stealthCheck = False
+    perceptionCheck = False
+
+    choice = input("What do you wish to do? (STEALTH, TRAP, RETURN or CONTINUE): ").lower().strip()
+    while stealthCheck is False and perceptionCheck is False:
+        if choice == "stealth":
+            stealthCheck = True
+            forward()
+            break
+        elif choice == "trap":
+            perceptionCheck = True
+            print("\nYou can only search thoroughly once the webs are removed\n\n\n")
+            pressToContinue()
+            forward()
+            trapDC = int(15)
+            characterAbility()
+            if character.perception >= trapDC:
+                obvious()
+            else:
+                trapless()
+            break
+        elif choice == "return":
+            locationOne()
+            break
+        elif choice == "continue":
+            forward()
+            break
+        else:
+            choice = input("That is not a valid option. Choose either STEALTH, TRAP, RETURN or CONTINUE: ").lower().strip()
+
+    while stealthCheck is True and perceptionCheck is False:
+        clear()
+        print("OPTIONS:")
+        print("\x1B[3mYou can check for traps: Roll perception by typing TRAP.\nWant to go back to the previous location? Type RETURN.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
+        if choice == "trap":
+            perceptionCheck = True
+            trapDC = int(15)
+            characterAbility()
+            if character.perception >= trapDC:
+                obvious()
+            else:
+                trapless()
+            break
+        elif choice == "return":
+            locationOne()
+            break
+        elif choice == "continue":
+            break
+        else:
+            choice = input("That is not a valid option. Choose either TRAP, RETURN or CONTINUE: ").lower().strip()
+
+    clear()
+    print("\x1B[3mYou can now move deeper into the forest by typing LEFT.\nOr you can choose to head back the way you came by typing BACK.\x1B[23m\n")
+    choice = input("Which path will you choose? (LEFT or BACK): ").lower().strip()
+    while True:
+        if choice == "left":
+            locationSix()
+            break
+        elif choice == "back":
+            locationOne()
+            break
+        else:
+            choice = input("That is not a valid path. Choose either LEFT or BACK: ").lower().strip()
+
+
+def forward():
+    clear()
+    print("- FORWARD -\n")
+    sleep(2)
+    print("You edge forward, drawing your weapon and keeping watch on all sides.\nAfter all, where there’s webs...\n\nYou stop before the first web, a thick mass of silken threads.\nIt looks tough; an ordinary weapon is going to struggle to cut through this.")
+
+    print("OPTIONS:")
+    print("\x1B[3mIf you want to try and use an ordinary torch to burn them away, type FLAMEWEB.\nIf you’d prefer to try and move them with your weapon, type SLASHWEB\nOr, you could just throw something at the web and see what happens? Type TESTWEB\x1B[23m\n")
+
+    choice = input("What do you wish to do? (FLAMEWEB, SLASHWEB or TESTWEB): ").lower().strip()
+    while True:
+        if choice == "flameweb":
+            flameweb()
+            break
+        elif choice == "slashweb":
+            slashweb()
+            break
+        elif choice == "testweb":
+            testweb()
+            break
+        else:
+            choice = input("That is not a valid option. Choose either FLAMEWEB, SLASHWEB or TESTWEB: ").lower().strip()
+
+def obvious():
+    clear()
+    print("- OBVIOUS -\n")
+    sleep(2)
+    print("Apart from the webs, you see no evidence of any traps.\n\n\n")
+    pressToContinue()
+
+def trapless():
+    clear()
+    print("- TRAPLESS -\n")
+    sleep(2)
+    print("Apart from the webs, you see no evidence of any traps.\n\n\n")
+    pressToContinue()
 
 playAgain = "yes"
 while playAgain == "yes" or playAgain == "y":
