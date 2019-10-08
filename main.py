@@ -1,4 +1,4 @@
-# name: Nicolai Hejlesen Jørgensen
+# author: Nicolai Hejlesen Jørgensen
 # date: 28-09-2019
 # description: Text-based role-playing adventure game (CYOA game)
 
