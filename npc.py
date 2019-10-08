@@ -164,3 +164,45 @@ def skeleton():
     skeleton.CR = "1/4 (50 xp)"
     skeleton.shortswordToHit = int(dice.roll('1d20') + 4)
     skeleton.shortswordDamage = int(dice.roll('1d6') + 2)
+
+def giantWolfSpider():
+    giantWolfSpider.name = "Giant Wolf Spider"
+    giantWolfSpider.size = "Medium"
+    giantWolfSpider.type = "beast"
+    giantWolfSpider.alignment = "Unaligned"
+    giantWolfSpider.AC = int(13)
+    giantWolfSpider.HP = int(1)
+    giantWolfSpider.speed = "40ft., climb 40 ft."
+    giantWolfSpider.strength = int(12)
+    giantWolfSpider.dexterity = int(16)
+    giantWolfSpider.constitution = int(13)
+    giantWolfSpider.intelligence = int(3)
+    giantWolfSpider.wisdom = int(12)
+    giantWolfSpider.charisma = int(4)
+    giantWolfSpider.senses = "Blindsight 10 ft., Darkvision 60 ft., passive Perception 13"
+    giantWolfSpider.CR = "1/4 (50 xp)"
+    giantWolfSpider.BiteToHit = int(dice.roll('1d20') + 3)
+    giantWolfSpider.BiteDamage = int(dice.roll('1d6') + 1)
+    # set up poison damage in main code when a check is needed
+
+def zombie():
+    zombie.name = "Zombie"
+    zombie.size = "Medium"
+    zombie.type = "undead"
+    zombie.alignment = "Neutral Evil"
+    zombie.AC = int(8)
+    zombie.HP = int(22)
+    zombie.speed = "20ft."
+    zombie.strength = int(13)
+    zombie.dexterity = int(6)
+    zombie.constitution = int(16)
+    zombie.intelligence = int(3)
+    zombie.wisdom = int(6)
+    zombie.charisma = int(5)
+    zombie.wisMod = int((zombie.wisdom - 10) / 2)
+    zombie.wisSave = int(dice.roll('1d20') + 2)
+    zombie.senses = "Darkvision 60 ft., passive Perception 8"
+    zombie.CR = "1/4 (50 xp)"
+    zombie.riseDC = 5 + int(character.DamageTotal)
+    zombie.SlamToHit = int(dice.roll('1d20') + 3)
+    zombie.SlamDamage = int(dice.roll('1d6') + 1)
