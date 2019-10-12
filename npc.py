@@ -82,9 +82,3 @@ giantWolfSpider = NPC("Giant Wolf Spider", 13, 11, 12, 16, 13, 3, 12, 4, 3, 1, 0
 # The Zombie uses a d6 to roll damage with its slam.
 # IMPORTANT: Set up the Undead Fortitude feature in main code when a check is needed.
 zombie = NPC("Zombie", 8, 22, 13, 6, 16, 3, 6, 5, 3, 1, 0, 0)
-
-
-print(NPC.to_hit_melee(darekBrewmont))
-print(NPC.damage_d4_melee(darekBrewmont))
-print(NPC.perception_check(darekBrewmont))
-print(NPC.stealth_check(darekBrewmont))
