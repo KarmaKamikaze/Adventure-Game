@@ -11,9 +11,53 @@ from player_character import PC
 from npc import NPC
 
 
+# character ability tracking
+character = pickle.load(open("character.dat", "rb"))
+stealth_points = 0
+damage_taken = 0
+pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+stealth_check = pickle.load(open("checks.dat", "rb"))
+perception_check = pickle.load(open("checks.dat", "rb"))
+stealth_quotes = ['You feel rather sneaky.', 'You are one with the shadows.', 'Non shall see you pass.']
+
+
+# npc stats
+# Darek Brewmont uses a d4 to roll damage with his weapon.
+darekBrewmont = NPC("Darek Brewmont", 10, 4, 10, 10, 10, 10, 10, 10, 2, 2, 0, 0)
+
+# The Giant Centipede uses a d4 to roll damage with its bite.
+giantCentipede = NPC("Giant Centipede", 13, 4, 5, 14, 12, 1, 7, 3, 4, 2, 0, 0)
+
+# The Cultists use a d6 to roll damage with its scimitar (melee) and its hand-crossbow (ranged).
+cultist = NPC("Cultist", 12, 9, 11, 12, 10, 10, 11, 10, 2, 0, 3, 0)
+
+# The Death Knight uses a d8 to roll damage with its Hellreaver.
+deathKnight = NPC("Death Knight", 15, 28, 15, 11, 13, 12, 10, 5, 5, 3, 0, 0)
+
+# The Goblins uses a d6 to roll damage with the spear and the battleaxe but a d4 for the bonestaff.
+goblin = NPC("Goblin", 15, 7, 8, 14, 10, 10, 8, 8, 1, 1, 2, 2)
+
+# The Kobold uses a d4 to roll damage with the dagger and a d6 for the fireball.
+kobold = NPC("Kobold", 12, 5, 7, 15, 9, 8, 7, 8, 4, 2, 2, 0)
+
+# The Forest Bat uses a d4 to roll damage with its bite.
+forestBat = NPC("Forest Bat", 12, 5, 7, 15, 8, 2, 12, 4, 0, 0, 0, 0)
+
+# The Skeleton uses a d6 to roll damage with its shortsword.
+skeleton = NPC("Skeleton", 13, 13, 10, 14, 15, 6, 8, 5, 4, 2, 0, 0, )
+
+# The Giant Wolf Spider uses a d6 to roll damage with its bite.
+# IMPORTANT: Set up poison damage in main code when a check is needed.
+giantWolfSpider = NPC("Giant Wolf Spider", 13, 11, 12, 16, 13, 3, 12, 4, 3, 1, 0, 0)
+
+# The Zombie uses a d6 to roll damage with its slam.
+# IMPORTANT: Set up the Undead Fortitude feature in main code when a check is needed.
+zombie = NPC("Zombie", 8, 22, 13, 6, 16, 3, 6, 5, 3, 1, 0, 0)
+
+
 # quick commands
 def clear():
-    #os.system('cls')    # clears screen on Windows
+    # os.system('cls')    # clears screen on Windows
     os.system('clear')  # clears screen on Linux / OS X
 
 
@@ -24,17 +68,12 @@ def press_to_continue():
         pass
 
 
-# tracking
-character = pickle.load(open("character.dat", "rb"))
-stealthPoints = 0
-damage_taken = 0
-stealthQuotes = ['You feel rather sneaky.', 'You are one with the shadows.', 'Non shall see you pass.']
-
-
 # character configuration
 def manuel_character_initiation():
     print("Use your favorite point-buy website, or roll 4d6 (keep the three highest values)")
     sleep(3)
+
+    global character
     try:
         character = PC(input("What is the name of your character?: ").title(),
                        int(input("Input your Strength score: ").strip()),
@@ -56,6 +95,8 @@ def manuel_character_initiation():
 
 
 def random_character_initiation():
+
+    global character
     character = PC(input("What is the name of your character?: ").title(),
                    int(dice.roll('3d6')),   # Strength
                    int(dice.roll('3d6')),   # Dexterity
@@ -431,6 +472,8 @@ def location_one():
           "traps: Roll perception by typing TRAP.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
     # If you succeed the stealth check, you may add 10 points to any d100 chance rolls you make while on this Location.
 
+    global stealth_check
+    global perception_check
     stealth_check = False
     perception_check = False
 
@@ -438,10 +481,12 @@ def location_one():
     while stealth_check is False and perception_check is False:
         if choice == "stealth":
             stealth_check = True
+            pickle.dump(stealth_check, open("checks.dat", "wb"))
             location_one_stealth()
             break
         elif choice == "trap":
             perception_check = True
+            pickle.dump(perception_check, open("checks.dat", "wb"))
             location_one_trap()
             break
         elif choice == "continue":
@@ -456,6 +501,7 @@ def location_one():
               "CONTINUE.\x1B[23m\n")
         if choice == "trap":
             perception_check = True
+            pickle.dump(perception_check, open("checks.dat", "wb"))
             location_one_trap()
             break
         elif choice == "continue":
@@ -470,6 +516,7 @@ def location_one():
               "wish to continue type CONTINUE.\x1B[23m\n")
         if choice == "stealth":
             stealth_check = True
+            pickle.dump(stealth_check, open("checks.dat", "wb"))
             location_one_stealth()
             break
         elif choice == "continue":
@@ -482,11 +529,11 @@ def location_one():
 def location_one_stealth():
     stealth_dc = int(12)
     if PC.stealth_check(character) >= stealth_dc:
-        stealth_reward = int(stealthPoints + 10)
-        print("\n" + random.choice(stealthQuotes) + "\n\n\n")
+        stealth_reward = int(stealth_points + 10)
+        print("\n" + random.choice(stealth_quotes) + "\n\n\n")
         press_to_continue()
     else:
-        print("\n" + random.choice(stealthQuotes) + "\n\n\n")
+        print("\n" + random.choice(stealth_quotes) + "\n\n\n")
         press_to_continue()
 
 
@@ -553,6 +600,8 @@ def location_two():
           "forward, type CONTINUE.\x1B[23m\n")
     # If you succeed the stealth check, you may add 10 points to any d100 chance rolls you make while on this Location.
 
+    global stealth_check
+    global perception_check
     stealth_check = False
     perception_check = False
 
@@ -560,11 +609,15 @@ def location_two():
     while stealth_check is False and perception_check is False:
         if choice == "stealth":
             stealth_check = True
+            pickle.dump(stealth_check, open("checks.dat", "wb"))
+            print("\n" + random.choice(stealth_quotes) + "\n\n\n")
+            press_to_continue()
             forward()
             break
         elif choice == "trap":
             perception_check = True
-            print("\nYou can only search thoroughly once the webs are removed\n\n\n")
+            pickle.dump(perception_check, open("checks.dat", "wb"))
+            print("\nYou can only search thoroughly once the webs are removed.\n\n\n")
             press_to_continue()
             forward()
             trap_dc = int(15)
@@ -580,7 +633,8 @@ def location_two():
             forward()
             break
         else:
-            choice = input("That is not a valid option. Choose either STEALTH, TRAP, RETURN or CONTINUE: ").lower().strip()
+            choice = input("That is not a valid option. "
+                           "Choose either STEALTH, TRAP, RETURN or CONTINUE: ").lower().strip()
 
     while stealth_check is True and perception_check is False:
         clear()
@@ -589,6 +643,7 @@ def location_two():
               "location? Type RETURN.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
         if choice == "trap":
             perception_check = True
+            pickle.dump(perception_check, open("checks.dat", "wb"))
             trap_dc = int(15)
             if PC.perception_check(character) >= trap_dc:
                 obvious()
@@ -624,7 +679,7 @@ def forward():
     sleep(2)
     print("You edge forward, drawing your weapon and keeping watch on all sides.\nAfter all, where there’s "
           "webs...\n\nYou stop before the first web, a thick mass of silken threads.\nIt looks tough; an ordinary "
-          "weapon is going to struggle to cut through this.")
+          "weapon is going to struggle to cut through this.\n\n\n")
 
     print("OPTIONS:")
     print("\x1B[3mIf you want to try and use an ordinary torch to burn them away, type FLAMEWEB.\nIf you’d prefer to "
@@ -660,6 +715,116 @@ def trapless():
     sleep(2)
     print("Apart from the webs, you see no evidence of any traps.\n\n\n")
     press_to_continue()
+
+
+def flameweb():
+    clear()
+    print("- FLAMEWEB -\n")
+    sleep(2)
+    print("You produce your flint and tinder and start trying to light some tinder to create fire...\n\nYou crouch "
+          "down, working the stone, trying to produce a fire that\ncan burn the webs away.\n\n\n")
+    press_to_continue()
+    while stealth_check:
+        stealth_dc = int(15)
+        if PC.stealth_check(character) >= stealth_dc:
+            here_we_go()
+            break
+        else:
+            oh_no()
+            break
+    oh_no()
+
+
+def here_we_go():
+    clear()
+    print("- HEREWEGO -\n")
+    sleep(2)
+    print("Suddenly you hear a rustling, movement off to the right side of the path.\nSuddenly, from the undergrowth, "
+          "two GIANT WOLF SPIDERS appear!\nSeeing you in their territory, the rear up, hissing horribly,\nand launch "
+          "themselves at you!\n\n\n")
+    press_to_continue()
+    spider_battle()
+
+
+def oh_no():
+    clear()
+    print("- OHNO -\n")
+    sleep(2)
+    print("Suddenly, you feel something pounce on you from behind!\n\nYour noisy progress through the forest must "
+          "have alerted it to your presence.\nYou turn frantically, trying to get the thing off, whatever it "
+          "is.\n\n\n")
+    press_to_continue()
+
+    spider_attack = NPC.to_hit_melee(giantWolfSpider)
+    if spider_attack >= PC.ac(character):
+        surprise_crawly()
+    else:
+        clear()
+        print("- OHNO -\n")
+        print("You manage to get the thing off your shoulder, and can now have a good look at it.\n\nA GIANT WOLF "
+              "SPIDER is before you, hissing horribly.\nIt is quickly joined by a mate, and they both attack "
+              "you!\n\n\n")
+        press_to_continue()
+        spider_battle()
+
+
+def surprise_crawly():
+    clear()
+    print("- SURPRISECRAWLY -\n")
+    sleep(2)
+    print("You feel something biting into your neck, and a burning sensation in your skin.\nSomething poisonous has "
+          "bitten you!\n\n\n")
+    sleep(2)
+
+    global damage_taken
+    surprise_bite = int(NPC.damage_d6_melee(giantWolfSpider))
+    surprise_poison = int(dice.roll('2d6'))
+
+    if PC.constitution_save(character) >= 11:
+        damage_taken += surprise_bite + int((surprise_poison / 2))
+        pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+        print("You steady yourself against the spiders poisonous bite.")
+        print("You take " + str(surprise_bite + int((surprise_poison / 2)))
+              + " points of damage from the poison-infested bite!\n\nYou have "
+              + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+        press_to_continue()
+        death_check()
+    else:
+        damage_taken += surprise_bite + surprise_poison
+        pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+        print("You succumb to the poison in the spiders fangs.")
+        print("You take " + str(surprise_bite + surprise_poison)
+              + " points of damage from the poison-infested bite!\n\nYou have "
+              + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+        press_to_continue()
+        death_check()
+
+    clear()
+    print("- SURPRISECRAWLY -\n")
+    print("Quickly you bat the thing off and turn, drawing your weapon.\nTwo GIANT WOLF SPIDERS are before you, "
+          "moving their pincers menacingly.\nStill smarting from the surprise attack, you move in,\nintent on "
+          "destroying the horrible creatures.\n\n\n")
+    press_to_continue()
+    spider_battle()
+
+
+def death_check():
+    if PC.hp(character) - damage_taken <= 0:
+        oh_well()
+    else:
+        pass
+
+
+def oh_well():
+    clear()
+    print("- OHWELL -\n")
+    sleep(2)
+    print("\x1B[3mHere endeth your adventure.\x1B[23m\n\n\n")
+    sleep(2)
+    print("\x1B[3mBut this doesn’t have to be the end. Why not take another stab at this?\nGo and roll up a fresh PC, "
+          "and try again!\nThere might be other things unexplored in this adventure,\nand surely Darek Brewmont "
+          "deserves a second chance?\x1B[23m\n\nThank you for playing The Death Knight’s Squire!\n\n\n")
+    raise SystemExit(0)
 
 
 playAgain = "yes"

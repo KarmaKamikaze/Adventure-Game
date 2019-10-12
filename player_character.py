@@ -13,8 +13,8 @@ class PC:
         self.charisma = charisma
 
     def hp(self):
-        current_hp = int(8 + (self.constitution - 10) / 2) - damage_taken
-        return current_hp
+        max_hp = int(8 + (self.constitution - 10) / 2)
+        return max_hp
 
     def ac(self):
         return int(13 + (self.dexterity - 10) / 2)
@@ -27,6 +27,10 @@ class PC:
         dexterity_modifier = int((self.dexterity - 10) / 2 + 2)
         return int(dice.roll('1d20')) + dexterity_modifier
 
+    def constitution_save(self):
+        constitution_modifier = int((self.constitution - 10) / 2 + 2)
+        return int(dice.roll('1d20')) + 1 + constitution_modifier
+
     def stealth_check(self):
         dexterity_modifier = int((self.dexterity - 10) / 2 + 2)
         return int(dice.roll('1d20')) + 3 + dexterity_modifier
@@ -35,8 +39,5 @@ class PC:
         wisdom_modifier = int((self.wisdom - 10) / 2 + 2)
         return int(dice.roll('1d20')) + 3 + wisdom_modifier
 
-
-# might not be needed once ported to main.py
-damage_taken = 0
 
 character = pickle.load(open("character.dat", "rb"))
