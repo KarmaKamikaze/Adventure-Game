@@ -18,6 +18,10 @@ class NPC:
         self.toHitRanged = toHitRanged
         self.damageRanged = damageRanged
 
+    def initiative(self):
+        dexterity_modifier = int((self.dexterity - 10) / 2)
+        return int(dice.roll('1d20')) + dexterity_modifier
+
     def to_hit_melee(self):
         return int(dice.roll('1d20')) + self.toHitMelee
 

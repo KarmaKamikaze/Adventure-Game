@@ -19,6 +19,10 @@ class PC:
     def ac(self):
         return int(13 + (self.dexterity - 10) / 2)
 
+    def initiative(self):
+        dexterity_modifier = int((self.dexterity - 10) / 2 + 2)
+        return int(dice.roll('1d20')) + dexterity_modifier
+
     def to_hit_melee(self):
         strength_modifier = int((self.strength - 10) / 2 + 2)
         return int(dice.roll('1d20')) + strength_modifier
@@ -26,6 +30,14 @@ class PC:
     def to_hit_ranged(self):
         dexterity_modifier = int((self.dexterity - 10) / 2 + 2)
         return int(dice.roll('1d20')) + dexterity_modifier
+
+    def damage_melee(self):
+        strength_modifier = int((self.strength - 10) / 2 + 2)
+        return int(dice.roll('2d6')) + strength_modifier
+
+    def blood_damage_melee(self):
+        strength_modifier = int((self.strength - 10) / 2 + 2)
+        return int(dice.roll('2d6')) + int(dice.roll('1d6')) + strength_modifier
 
     def constitution_save(self):
         constitution_modifier = int((self.constitution - 10) / 2 + 2)

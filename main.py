@@ -10,16 +10,17 @@ import pickle
 from player_character import PC
 from npc import NPC
 
-
 # character ability tracking
 character = pickle.load(open("character.dat", "rb"))
 stealth_points = 0
+checked_traps = pickle.load(open("checks.dat", "rb"))
 damage_taken = 0
 pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
 stealth_check = pickle.load(open("checks.dat", "rb"))
 perception_check = pickle.load(open("checks.dat", "rb"))
+has_blood_knight_sword = False
+has_potion_of_healing = 0
 stealth_quotes = ['You feel rather sneaky.', 'You are one with the shadows.', 'Non shall see you pass.']
-
 
 # npc stats
 # Darek Brewmont uses a d4 to roll damage with his weapon.
@@ -95,15 +96,14 @@ def manuel_character_initiation():
 
 
 def random_character_initiation():
-
     global character
     character = PC(input("What is the name of your character?: ").title(),
-                   int(dice.roll('3d6')),   # Strength
-                   int(dice.roll('3d6')),   # Dexterity
-                   int(dice.roll('3d6')),   # Constitution
-                   int(dice.roll('3d6')),   # Intelligence
-                   int(dice.roll('3d6')),   # Wisdom
-                   int(dice.roll('3d6')))   # Charisma
+                   int(dice.roll('3d6')),  # Strength
+                   int(dice.roll('3d6')),  # Dexterity
+                   int(dice.roll('3d6')),  # Constitution
+                   int(dice.roll('3d6')),  # Intelligence
+                   int(dice.roll('3d6')),  # Wisdom
+                   int(dice.roll('3d6')))  # Charisma
     pickle.dump(character, open("character.dat", "wb"))
     print("Strength: " + str(character.strength))
     print("Dexterity: " + str(character.dexterity))
@@ -118,7 +118,8 @@ def random_character_initiation():
 # game start
 def start_game():
     clear()
-    random_character = input("Would you like roll up a character with random stats? (yes or y to skip): ").lower().strip()
+    random_character = input(
+        "Would you like roll up a character with random stats? (yes or y to skip): ").lower().strip()
     if random_character == "yes" or random_character == "y":
         clear()
         random_character_initiation()
@@ -492,7 +493,7 @@ def location_one():
         elif choice == "continue":
             break
         else:
-            choice = input("That is not a valid option. Choose either STEALTH, TRAP or CONTINUE: ").lower().strip()
+            choice = input("Choose either STEALTH, TRAP or CONTINUE: ").lower().strip()
 
     while stealth_check is True and perception_check is False:
         clear()
@@ -507,7 +508,7 @@ def location_one():
         elif choice == "continue":
             break
         else:
-            choice = input("That is not a valid option. Choose either TRAP or CONTINUE: ").lower().strip()
+            choice = input("Choose either TRAP or CONTINUE: ").lower().strip()
 
     while stealth_check is False and perception_check is True:
         clear()
@@ -522,7 +523,7 @@ def location_one():
         elif choice == "continue":
             break
         else:
-            choice = input("That is not a valid option. Choose either STEALTH or CONTINUE: ").lower().strip()
+            choice = input("Choose either STEALTH or CONTINUE: ").lower().strip()
     quiet_entry()
 
 
@@ -620,57 +621,14 @@ def location_two():
             print("\nYou can only search thoroughly once the webs are removed.\n\n\n")
             press_to_continue()
             forward()
-            trap_dc = int(15)
-            if PC.perception_check(character) >= trap_dc:
-                obvious()
-            else:
-                trapless()
-            break
         elif choice == "return":
-            location_one()
+            quiet_entry()
             break
         elif choice == "continue":
             forward()
             break
         else:
-            choice = input("That is not a valid option. "
-                           "Choose either STEALTH, TRAP, RETURN or CONTINUE: ").lower().strip()
-
-    while stealth_check is True and perception_check is False:
-        clear()
-        print("OPTIONS:")
-        print("\x1B[3mYou can check for traps: Roll perception by typing TRAP.\nWant to go back to the previous "
-              "location? Type RETURN.\nIf you just wish to continue type CONTINUE.\x1B[23m\n")
-        if choice == "trap":
-            perception_check = True
-            pickle.dump(perception_check, open("checks.dat", "wb"))
-            trap_dc = int(15)
-            if PC.perception_check(character) >= trap_dc:
-                obvious()
-            else:
-                trapless()
-            break
-        elif choice == "return":
-            location_one()
-            break
-        elif choice == "continue":
-            break
-        else:
-            choice = input("That is not a valid option. Choose either TRAP, RETURN or CONTINUE: ").lower().strip()
-
-    clear()
-    print("\x1B[3mYou can now move deeper into the forest by typing LEFT.\nOr you can choose to head back the way you "
-          "came by typing BACK.\x1B[23m\n")
-    choice = input("Which path will you choose? (LEFT or BACK): ").lower().strip()
-    while True:
-        if choice == "left":
-            locationSix()
-            break
-        elif choice == "back":
-            location_one()
-            break
-        else:
-            choice = input("That is not a valid path. Choose either LEFT or BACK: ").lower().strip()
+            choice = input("Choose either STEALTH, TRAP, RETURN or CONTINUE: ").lower().strip()
 
 
 def forward():
@@ -733,6 +691,33 @@ def flameweb():
             oh_no()
             break
     oh_no()
+
+
+def slashweb():
+    clear()
+    print("- SLASHWEB -\n")
+    sleep(2)
+    print("You produce your weapon and start hacking away at the webs, but they\nare not giving way easily! This is "
+          "going to take some time.\n\n\n")
+    press_to_continue()
+    while stealth_check:
+        stealth_dc = int(15)
+        if PC.stealth_check(character) >= stealth_dc:
+            here_we_go()
+            break
+        else:
+            oh_no()
+            break
+    oh_no()
+
+
+def testweb():
+    clear()
+    print("- TESTWEB -\n")
+    sleep(2)
+    print("You pick up a stick and toss it into the web, then draw your weapon,\nawaiting what might come...\n\n\n")
+    press_to_continue()
+    here_we_go()
 
 
 def here_we_go():
@@ -806,6 +791,1170 @@ def surprise_crawly():
           "destroying the horrible creatures.\n\n\n")
     press_to_continue()
     spider_battle()
+
+
+def spider_battle():
+    clear()
+    print("- SPIDERBATTLE -\n")
+    sleep(2)
+
+    global has_blood_knight_sword
+    global damage_taken
+    bite_damage = int(NPC.damage_d6_melee(giantWolfSpider))
+    poison_damage = int(dice.roll('2d6'))
+
+    spider_npc_1_max_hp = giantWolfSpider.hp
+    spider_npc_2_max_hp = giantWolfSpider.hp
+    spider_npc_1_damage_taken = 0
+    spider_npc_2_damage_taken = 0
+
+    npc_initiative = NPC.initiative(giantWolfSpider)
+    pc_initiative = PC.initiative(character)
+
+    while damage_taken <= PC.hp(character) and spider_npc_1_damage_taken <= spider_npc_1_max_hp:
+        if pc_initiative >= npc_initiative:
+            clear()
+            print("- SPIDERBATTLE -\n")
+            print("You prepare yourself to attack the spider!\n\n")
+            print("Two GIANT WOLF SPIDERS are still alive!\n\n")
+            try:
+                input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+            except SyntaxError:
+                pass
+            character_attack = PC.to_hit_melee(character)
+            clear()
+            sleep(1)
+            print("Rolling.")
+            sleep(1)
+            clear()
+            print("Rolling..")
+            sleep(1)
+            clear()
+            print("Rolling...\n\n")
+            if character_attack >= giantWolfSpider.ac:
+                if has_blood_knight_sword:
+                    print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                    sleep(1)
+                    print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                    spider_npc_1_damage_taken += PC.blood_damage_melee(character)
+                    press_to_continue()
+                    if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                        break
+                    else:
+                        pass
+                    clear()
+                    print("- SPIDERBATTLE -\n")
+                    print("The spider tries to attack you!\n\n")
+                    if NPC.to_hit_melee(giantWolfSpider) >= PC.ac(character):
+                        print("It thrusts its fangs deep into your soft skin.\n")
+                        sleep(1)
+                        if PC.constitution_save(character) >= 11:
+                            damage_taken += bite_damage + int((poison_damage / 2))
+                            pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                            print("You manage to steady yourself against the spiders poisonous bite.")
+                            print("You take " + str(bite_damage + int((poison_damage / 2)))
+                                  + " points of damage from the poison-infested bite!\n\nYou have "
+                                  + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                            press_to_continue()
+                            death_check()
+                        else:
+                            damage_taken += bite_damage + poison_damage
+                            pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                            print("You succumb to the poison in the spiders fangs.")
+                            print("You take " + str(bite_damage + poison_damage)
+                                  + " points of damage from the poison-infested bite!\n\nYou have "
+                                  + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                            press_to_continue()
+                            death_check()
+                else:
+                    print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                    sleep(1)
+                    print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                    spider_npc_1_damage_taken += PC.damage_melee(character)
+                    press_to_continue()
+                    if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                        break
+                    else:
+                        pass
+                    clear()
+                    print("- SPIDERBATTLE -\n")
+                    print("The spider tries to attack you!\n\n")
+                    if NPC.to_hit_melee(giantWolfSpider) >= PC.ac(character):
+                        print("It thrusts its fangs deep into your soft skin.\n")
+                        sleep(1)
+                        if PC.constitution_save(character) >= 11:
+                            damage_taken += bite_damage + int((poison_damage / 2))
+                            pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                            print("You manage to steady yourself against the spiders poisonous bite.")
+                            print("You take " + str(bite_damage + int((poison_damage / 2)))
+                                  + " points of damage from the poison-infested bite!\n\nYou have "
+                                  + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                            press_to_continue()
+                            death_check()
+                        else:
+                            damage_taken += bite_damage + poison_damage
+                            pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                            print("You succumb to the poison in the spiders fangs.")
+                            print("You take " + str(bite_damage + poison_damage)
+                                  + " points of damage from the poison-infested bite!\n\nYou have "
+                                  + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                            press_to_continue()
+                            death_check()
+                    else:
+                        sleep(1)
+                        print("It misses!\n\n\n")
+                        press_to_continue()
+            else:
+                print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                press_to_continue()
+                clear()
+                print("- SPIDERBATTLE -\n")
+                print("The spider tries to attack you!\n\n")
+                if NPC.to_hit_melee(giantWolfSpider) >= PC.ac(character):
+                    print("It thrusts its fangs deep into your soft skin.\n")
+                    sleep(1)
+                    if PC.constitution_save(character) >= 11:
+                        damage_taken += bite_damage + int((poison_damage / 2))
+                        pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                        print("You manage to steady yourself against the spiders poisonous bite.")
+                        print("You take " + str(bite_damage + int((poison_damage / 2)))
+                              + " points of damage from the poison-infested bite!\n\nYou have "
+                              + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                        press_to_continue()
+                        death_check()
+                    else:
+                        damage_taken += bite_damage + poison_damage
+                        pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                        print("You succumb to the poison in the spiders fangs.")
+                        print("You take " + str(bite_damage + poison_damage)
+                              + " points of damage from the poison-infested bite!\n\nYou have "
+                              + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                        press_to_continue()
+                        death_check()
+        else:
+            clear()
+            print("- SPIDERBATTLE -\n")
+            print("The spider tries to attack you!\n\n")
+            print("Two GIANT WOLF SPIDERS are still alive!\n\n")
+            if NPC.to_hit_melee(giantWolfSpider) >= PC.ac(character):
+                print("It thrusts its fangs deep into your soft skin.\n")
+                sleep(1)
+                if PC.constitution_save(character) >= 11:
+                    damage_taken += bite_damage + int((poison_damage / 2))
+                    pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                    print("You manage to steady yourself against the spiders poisonous bite.")
+                    print("You take " + str(bite_damage + int((poison_damage / 2)))
+                          + " points of damage from the poison-infested bite!\n\nYou have "
+                          + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                    press_to_continue()
+                    death_check()
+                    clear()
+                    print("- SPIDERBATTLE -\n")
+                    print("You prepare yourself to attack the spider!\n\n")
+                    try:
+                        input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+                    except SyntaxError:
+                        pass
+                    character_attack = PC.to_hit_melee(character)
+                    clear()
+                    sleep(1)
+                    print("Rolling.")
+                    sleep(1)
+                    clear()
+                    print("Rolling..")
+                    sleep(1)
+                    clear()
+                    print("Rolling...\n\n")
+                    if character_attack >= giantWolfSpider.ac:
+                        if has_blood_knight_sword:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_1_damage_taken += PC.blood_damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                                break
+                            else:
+                                pass
+                        else:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_1_damage_taken += PC.damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                                break
+                            else:
+                                pass
+                    else:
+                        print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                        press_to_continue()
+                else:
+                    damage_taken += bite_damage + poison_damage
+                    pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                    print("You succumb to the poison in the spiders fangs.")
+                    print("You take " + str(bite_damage + poison_damage)
+                          + " points of damage from the poison-infested bite!\n\nYou have "
+                          + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                    press_to_continue()
+                    death_check()
+                    clear()
+                    print("- SPIDERBATTLE -\n")
+                    print("You prepare yourself to attack the spider!\n\n")
+                    try:
+                        input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+                    except SyntaxError:
+                        pass
+                    character_attack = PC.to_hit_melee(character)
+                    clear()
+                    sleep(1)
+                    print("Rolling.")
+                    sleep(1)
+                    clear()
+                    print("Rolling..")
+                    sleep(1)
+                    clear()
+                    print("Rolling...\n\n")
+                    if character_attack >= giantWolfSpider.ac:
+                        if has_blood_knight_sword:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_1_damage_taken += PC.blood_damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                                break
+                            else:
+                                pass
+                        else:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_1_damage_taken += PC.damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                                break
+                            else:
+                                pass
+                    else:
+                        print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                        press_to_continue()
+            else:
+                sleep(1)
+                print("It misses!\n\n\n")
+                press_to_continue()
+                clear()
+                print("- SPIDERBATTLE -\n")
+                print("You prepare yourself to attack the spider!\n\n")
+                try:
+                    input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+                except SyntaxError:
+                    pass
+                character_attack = PC.to_hit_melee(character)
+                clear()
+                sleep(1)
+                print("Rolling.")
+                sleep(1)
+                clear()
+                print("Rolling..")
+                sleep(1)
+                clear()
+                print("Rolling...\n\n")
+                if character_attack >= giantWolfSpider.ac:
+                    if has_blood_knight_sword:
+                        print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                        sleep(1)
+                        print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                        spider_npc_1_damage_taken += PC.blood_damage_melee(character)
+                        press_to_continue()
+                        if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                            break
+                        else:
+                            pass
+                    else:
+                        print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                        sleep(1)
+                        print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                        spider_npc_1_damage_taken += PC.damage_melee(character)
+                        press_to_continue()
+                        if spider_npc_1_damage_taken >= spider_npc_1_max_hp:
+                            break
+                        else:
+                            pass
+                else:
+                    print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                    press_to_continue()
+
+    while damage_taken <= PC.hp(character) and spider_npc_2_damage_taken <= spider_npc_2_max_hp:
+        if pc_initiative >= npc_initiative:
+            clear()
+            print("- SPIDERBATTLE -\n")
+            print("You prepare yourself to attack the spider!\n\n")
+            print("One GIANT WOLF SPIDER still remain!\n\n")
+            try:
+                input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+            except SyntaxError:
+                pass
+            character_attack = PC.to_hit_melee(character)
+            clear()
+            sleep(1)
+            print("Rolling.")
+            sleep(1)
+            clear()
+            print("Rolling..")
+            sleep(1)
+            clear()
+            print("Rolling...\n\n")
+            if character_attack >= giantWolfSpider.ac:
+                if has_blood_knight_sword:
+                    print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                    sleep(1)
+                    print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                    spider_npc_2_damage_taken += PC.blood_damage_melee(character)
+                    press_to_continue()
+                    if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                        break
+                    else:
+                        pass
+                else:
+                    print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                    sleep(1)
+                    print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                    spider_npc_2_damage_taken += PC.damage_melee(character)
+                    press_to_continue()
+                    if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                        break
+                    else:
+                        pass
+                    clear()
+                    print("- SPIDERBATTLE -\n")
+                    print("The spider tries to attack you!\n\n")
+                    if NPC.to_hit_melee(giantWolfSpider) >= PC.ac(character):
+                        print("It thrusts its fangs deep into your soft skin.\n")
+                        sleep(1)
+                        if PC.constitution_save(character) >= 11:
+                            damage_taken += bite_damage + int((poison_damage / 2))
+                            pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                            print("You manage to steady yourself against the spiders poisonous bite.")
+                            print("You take " + str(bite_damage + int((poison_damage / 2)))
+                                  + " points of damage from the poison-infested bite!\n\nYou have "
+                                  + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                            press_to_continue()
+                            death_check()
+                        else:
+                            damage_taken += bite_damage + poison_damage
+                            pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                            print("You succumb to the poison in the spiders fangs.")
+                            print("You take " + str(bite_damage + poison_damage)
+                                  + " points of damage from the poison-infested bite!\n\nYou have "
+                                  + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                            press_to_continue()
+                            death_check()
+                    else:
+                        sleep(1)
+                        print("It misses!\n\n\n")
+                        press_to_continue()
+            else:
+                print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                press_to_continue()
+                clear()
+                print("- SPIDERBATTLE -\n")
+                print("The spider tries to attack you!\n\n")
+                if NPC.to_hit_melee(giantWolfSpider) >= PC.ac(character):
+                    print("It thrusts its fangs deep into your soft skin.\n")
+                    sleep(1)
+                    if PC.constitution_save(character) >= 11:
+                        damage_taken += bite_damage + int((poison_damage / 2))
+                        pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                        print("You manage to steady yourself against the spiders poisonous bite.")
+                        print("You take " + str(bite_damage + int((poison_damage / 2)))
+                              + " points of damage from the poison-infested bite!\n\nYou have "
+                              + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                        press_to_continue()
+                        death_check()
+                    else:
+                        damage_taken += bite_damage + poison_damage
+                        pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                        print("You succumb to the poison in the spiders fangs.")
+                        print("You take " + str(bite_damage + poison_damage)
+                              + " points of damage from the poison-infested bite!\n\nYou have "
+                              + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                        press_to_continue()
+                        death_check()
+        else:
+            clear()
+            print("- SPIDERBATTLE -\n")
+            print("The spider tries to attack you!\n\n")
+            print("One GIANT WOLF SPIDER still remain!\n\n")
+            if NPC.to_hit_melee(giantWolfSpider) >= PC.ac(character):
+                print("It thrusts its fangs deep into your soft skin.\n")
+                sleep(1)
+                if PC.constitution_save(character) >= 11:
+                    damage_taken += bite_damage + int((poison_damage / 2))
+                    pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                    print("You manage to steady yourself against the spiders poisonous bite.")
+                    print("You take " + str(bite_damage + int((poison_damage / 2)))
+                          + " points of damage from the poison-infested bite!\n\nYou have "
+                          + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                    press_to_continue()
+                    death_check()
+                    clear()
+                    print("- SPIDERBATTLE -\n")
+                    print("You prepare yourself to attack the spider!\n\n")
+                    try:
+                        input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+                    except SyntaxError:
+                        pass
+                    character_attack = PC.to_hit_melee(character)
+                    clear()
+                    sleep(1)
+                    print("Rolling.")
+                    sleep(1)
+                    clear()
+                    print("Rolling..")
+                    sleep(1)
+                    clear()
+                    print("Rolling...\n\n")
+                    if character_attack >= giantWolfSpider.ac:
+                        if has_blood_knight_sword:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_2_damage_taken += PC.blood_damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                                break
+                            else:
+                                pass
+                        else:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_2_damage_taken += PC.damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                                break
+                            else:
+                                pass
+                    else:
+                        print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                        press_to_continue()
+                else:
+                    damage_taken += bite_damage + poison_damage
+                    pickle.dump(damage_taken, open("damage_taken.dat", "wb"))
+                    print("You succumb to the poison in the spiders fangs.")
+                    print("You take " + str(bite_damage + poison_damage)
+                          + " points of damage from the poison-infested bite!\n\nYou have "
+                          + str(PC.hp(character) - damage_taken) + " HP left!\n\n\n")
+                    press_to_continue()
+                    death_check()
+                    clear()
+                    print("- SPIDERBATTLE -\n")
+                    print("You prepare yourself to attack the spider!\n\n")
+                    try:
+                        input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+                    except SyntaxError:
+                        pass
+                    character_attack = PC.to_hit_melee(character)
+                    clear()
+                    sleep(1)
+                    print("Rolling.")
+                    sleep(1)
+                    clear()
+                    print("Rolling..")
+                    sleep(1)
+                    clear()
+                    print("Rolling...\n\n")
+                    if character_attack >= giantWolfSpider.ac:
+                        if has_blood_knight_sword:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_2_damage_taken += PC.blood_damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                                break
+                            else:
+                                pass
+                        else:
+                            print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                            sleep(1)
+                            print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                            spider_npc_2_damage_taken += PC.damage_melee(character)
+                            press_to_continue()
+                            if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                                break
+                            else:
+                                pass
+                    else:
+                        print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                        press_to_continue()
+            else:
+                sleep(1)
+                print("It misses!\n\n\n")
+                press_to_continue()
+                clear()
+                print("- SPIDERBATTLE -\n")
+                print("You prepare yourself to attack the spider!\n\n")
+                try:
+                    input("\x1B[3mPress Enter to ATTACK...\x1B[23m")
+                except SyntaxError:
+                    pass
+                character_attack = PC.to_hit_melee(character)
+                clear()
+                sleep(1)
+                print("Rolling.")
+                sleep(1)
+                clear()
+                print("Rolling..")
+                sleep(1)
+                clear()
+                print("Rolling...\n\n")
+                if character_attack >= giantWolfSpider.ac:
+                    if has_blood_knight_sword:
+                        print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                        sleep(1)
+                        print("\nThe spider takes " + str(PC.blood_damage_melee(character)) + " points of damage!\n\n\n")
+                        spider_npc_2_damage_taken += PC.blood_damage_melee(character)
+                        press_to_continue()
+                        if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                            break
+                        else:
+                            pass
+                    else:
+                        print(str(character_attack) + "\x1B[3m HITS!\x1B[23m")
+                        sleep(1)
+                        print("\nThe spider takes " + str(PC.damage_melee(character)) + " points of damage!\n\n\n")
+                        spider_npc_2_damage_taken += PC.damage_melee(character)
+                        press_to_continue()
+                        if spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+                            break
+                        else:
+                            pass
+                else:
+                    print(str(character_attack) + "\x1B[3m MISSES!\x1B[23m")
+                    press_to_continue()
+
+    if spider_npc_1_damage_taken >= spider_npc_1_max_hp and spider_npc_2_damage_taken >= spider_npc_2_max_hp:
+        dead_spiders()
+    else:
+        pass
+
+
+def dead_spiders():
+    clear()
+    print("- DEADSPIDERS -\n")
+    sleep(2)
+    print("\x1B[3mYou gain 100 xp!\x1B[23m\n\n")
+    sleep(2)
+    print("You take a moment to catch your breath, recovering from the battle with the spiders.\nTheir dismembered "
+          "corpses litter the ground. You destroy the rest of the webs,\nand then assess the situation.\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mTo have a look around near the spiders corpses, type INVESTIGATESPIDERS.\nOtherwise, if you just "
+          "want to continue, type CONTINUE.\x1B[23m\n")
+
+    choice = input("What do you wish to do? (INVESTIGATESPIDERS or CONTINUE): ").lower().strip()
+    while True:
+        if choice == "investigatespiders":
+            investigate_spiders()
+            break
+        elif choice == "continue":
+            location_two_cleared()
+            break
+        else:
+            choice = input("That is not a valid option. Choose either INVESTIGATESPIDERS or CONTINUE: ").lower().strip()
+
+
+def investigate_spiders():
+    clear()
+    print("- INVESTIGATESPIDERS -\n")
+    sleep(2)
+    print("You start to look around, searching the bush by the track and seeingif you can\nfind anything – or anyone "
+          "– the spiders may have stashed nearby.\n\nJust off the path, you find several dried up corpses, "
+          "wrapped in old webs –\nthe remains of a few hapless travellers. A quick look through the pockets\nof a "
+          "dead orc turns up 21 copper pieces and a dagger.\nA further search of two human corpses produces a heavy "
+          "crossbow and... jackpot!\nA bottle labelled “Potion of Healing”!\n\nYou even recognize the script: it’s "
+          "from a reputable dealer in Neverwinter\nwho you have bought potions from before. You drop the items "
+          "into\nyour backpack and move back onto the path.\n\n\n")
+    press_to_continue()
+    location_two_cleared()
+
+
+def location_two_cleared():
+    clear()
+    print("WEATHERCOTE WOOD")
+    print("- Location Two -\n")
+    sleep(2)
+    print("\x1B[3mChecking for traps? Roll perceptionby typing TRAP.\nYou can move deeper into the forest by typing "
+          "LEFT.\nOr you can choose to head back to location one by typing BACK.\x1B[23m\n")
+
+    global perception_check
+    perception_check = False
+
+    choice = input("What do you wish to do? (TRAP, LEFT or BACK): ").lower().strip()
+    while perception_check is False:
+        if choice == "trap":
+            perception_check = True
+            pickle.dump(perception_check, open("checks.dat", "wb"))
+            trap_dc = int(15)
+            if PC.perception_check(character) >= trap_dc:
+                obvious()
+                break
+            else:
+                trapless()
+                break
+        elif choice == "left":
+            location_six()
+            break
+        elif choice == "back":
+            quiet_entry()
+            break
+        else:
+            choice = input("Choose either TRAP, LEFT or BACK: ").lower().strip()
+
+    while perception_check is True:
+        if choice == "left":
+            location_six()
+            break
+        elif choice == "back":
+            quiet_entry()
+            break
+        else:
+            choice = input("Choose either LEFT or BACK: ").lower().strip()
+
+
+def location_six():
+    clear()
+    print("WEATHERCOTE WOOD")
+    print("- Location Six -\n")
+    sleep(2)
+    print("You round the corner and see a house on the western side of the path.\nIt appears to be inhabited: smoke "
+          "is drifting from the chimney.\nWho knows who waits inside here? An kindly old wizard hermit,\nor a warlock "
+          "quietly plotting the domination of the world?\n\nCome to think of if, this could even be where the death "
+          "knight is hiding!\nThe cabin doesn’t look like much though... it could just be a\ncommoner family. And "
+          "they might have food...\n\nYour belly begins to rumble at the thought of a hot meal.\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mYou can move with stealth. Make a stealth check, if you wish by typing STEALTH.\nYou can check for "
+          "traps: Roll perception by typing TRAP.\nTo approach and investigate the house, type LITTLEHUT.\nIf you "
+          "just wish to continue type CONTINUE.\nIf you wish to turn back to location two, type BACK.\x1B[23m\n")
+    # If you succeed the stealth check, you may add 10 points to any d100 chance rolls you make while on this Location.
+
+    global stealth_check
+    global perception_check
+    global checked_traps
+    stealth_check = False
+    perception_check = False
+    checked_traps = False
+
+    choice = input("What do you wish to do? (STEALTH, TRAP, LITTLEHUT, CONTINUE or BACK): ").lower().strip()
+    while stealth_check is False and perception_check is False:
+        if choice == "stealth":
+            stealth_check = True
+            pickle.dump(stealth_check, open("checks.dat", "wb"))
+            # take note of stealth check success of failure for later.
+            print("\n" + random.choice(stealth_quotes) + "\n\n\n")
+            press_to_continue()
+            break
+        elif choice == "trap":
+            perception_check = True
+            checked_traps = True
+            pickle.dump(perception_check, open("checks.dat", "wb"))
+            pickle.dump(checked_traps, open("checks.dat", "wb"))
+            more_traps()
+            break
+        elif choice == "littlehut":
+            little_hut()
+            break
+        elif choice == "continue":
+            what_awaits()
+            break
+        elif choice == "back":
+            location_two_cleared()
+            break
+        else:
+            choice = input("Choose either STEALTH, TRAP, LITTLEHUT, CONTINUE or BACK: ").lower().strip()
+
+    while stealth_check is True and perception_check is False:
+        clear()
+        print("OPTIONS:")
+        print("\x1B[3mYou can check for traps: Roll perception by typing TRAP.\nTo approach and investigate the "
+              "house, type LITTLEHUT.\nIf you just wish to continue type CONTINUE.\nIf you wish to turn back to "
+              "location two, type BACK.\x1B[23m\n")
+        if choice == "trap":
+            perception_check = True
+            checked_traps = True
+            pickle.dump(perception_check, open("checks.dat", "wb"))
+            pickle.dump(checked_traps, open("checks.dat", "wb"))
+            more_traps()
+            break
+        elif choice == "littlehut":
+            little_hut()
+            break
+        elif choice == "continue":
+            what_awaits()
+            break
+        elif choice == "back":
+            location_two_cleared()
+            break
+        else:
+            choice = input("Choose either TRAP, LITTLEHUT, CONTINUE or BACK: ").lower().strip()
+
+    while stealth_check is False and perception_check is True:
+        clear()
+        print("OPTIONS:")
+        print("\x1B[3mYou can move with stealth. Make a stealth check, if you wish by typing STEALTH.\nTo approach "
+              "and investigate the house, type LITTLEHUT.\nIf you just wish to continue type CONTINUE.\nIf you wish "
+              "to turn back to location two, type BACK.\x1B[23m\n")
+        if choice == "stealth":
+            stealth_check = True
+            pickle.dump(stealth_check, open("checks.dat", "wb"))
+            # take note of stealth check success of failure for later.
+            print("\n" + random.choice(stealth_quotes) + "\n\n\n")
+            press_to_continue()
+            break
+        elif choice == "littlehut":
+            little_hut()
+            break
+        elif choice == "continue":
+            what_awaits()
+            break
+        elif choice == "back":
+            location_two_cleared()
+            break
+        else:
+            choice = input("Choose either STEALTH, LITTLEHUT, CONTINUE or BACK: ").lower().strip()
+
+    while stealth_check is True and perception_check is True:
+        clear()
+        print("OPTIONS:")
+        print("\x1B[3mTo approach and investigate the house, type LITTLEHUT.\nIf you just wish to continue type "
+              "CONTINUE.\nIf you wish to turn back to location two, type BACK.\x1B[23m\n")
+        if choice == "littlehut":
+            little_hut()
+            break
+        elif choice == "continue":
+            what_awaits()
+            break
+        elif choice == "back":
+            location_two_cleared()
+            break
+        else:
+            choice = input("Choose either LITTLEHUT, CONTINUE or BACK: ").lower().strip()
+
+
+def more_traps():
+    trap_dc = int(18)
+    if PC.perception_check(character) >= trap_dc:
+        path_danger()
+    else:
+        seems_not()
+
+
+def seems_not():
+    clear()
+    print("- SEEMSNOT -\n")
+    sleep(2)
+    print("You do a pretty thorough search for traps, but find nothing.\n\n\n")
+    press_to_continue()
+
+
+def path_danger():
+    clear()
+    print("- PATHDANGER -\n")
+    sleep(2)
+    print("You have a good look around this part of the path, visually searching the ground and the trees,\nlooking "
+          "for any sign of a trap. And that’s exactly what you find.\nEtched into the trunk of one tree on the east "
+          "side of the path, so well hidden\nthat it could be easily missed, you see a rune of some sort.\nYou’re not "
+          "entirely unfamiliar with this sort of thing. A sorcerer friend\nof yours gave you a long lecture on these "
+          "once. They are known as glyphs,\nand they trigger magical effects when someone comes near them.\nYou duck "
+          "behind a tree and peer out, examining it from a distance.\nHow are you going to get past this?\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mIf you want to go off the path and pass the tree on the right hand side, type GOAROUND.\nIf you "
+          "want to drop to the ground and go under the level of the glyph, type DUCKUNDER.\nYou could also backtrack. "
+          "To backtrack, type LOCATIONTWO.\nIf you want to ignore the glyph and continue north, type WHATAWAITS.\nThe "
+          "entrance to the house is closer on the path than the glyph.\nTo visit the house without walking past the "
+          "glyph, type LITTLEHUT.\x1B[23m\n")
+
+    choice = input("What do you wish to do? "
+                   "(GOAROUND, DUCKUNDER, LOCATIONTWO, WHATAWAITS or LITTLEHUT): ").lower().strip()
+    while True:
+        if choice == "goaround":
+            go_around()
+            break
+        elif choice == "duckunder":
+            duck_under()
+            break
+        elif choice == "locationtwo":
+            location_two_cleared()
+            break
+        elif choice == "whatawaits":
+            what_awaits()
+            break
+        elif choice == "littlehut":
+            little_hut()
+            break
+        else:
+            choice = input("Choose either GOAROUND, DUCKUNDER, LOCATIONTWO, WHATAWAITS or LITTLEHUT: ").lower().strip()
+
+
+def go_around():
+    clear()
+    print("- GOAROUND -\n")
+    sleep(2)
+    print("You go around the eastern side of the tree, taking care to crouch as well, just to be safe.\nIf there is "
+          "some sort of effect inherent in this glyph, you have managed to avoid it.\nGood work!\n\nHowever, "
+          "could you go to the hut, visit there, while avoiding any effects the glyph had?\nPerhaps the glyph itself "
+          "is redundant? There is no way of telling!\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mTo investigate the little house, type LITTLEHUT.\nTo ignore the little house and continue down the "
+          "path, type CONTINUE.\x1B[23m\n")
+
+    choice = input("What do you wish to do? (LITTLEHUT or CONTINUE): ").lower().strip()
+    while True:
+        if choice == "littlehut":
+            little_hut()
+            break
+        elif choice == "continue":
+            what_awaits()
+            break
+        else:
+            choice = input("Choose either LITTLEHUT or CONTINUE: ").lower().strip()
+
+
+def duck_under():
+    clear()
+    print("- DUCKUNDER -\n")
+    sleep(2)
+    print("You crouch as you make your way forward along the path,\ntaking care to stay below the level of the "
+          "glyph.\n\nIf there is any sort of effect that it is supposed to emanate,\nyou seem to be avoiding "
+          "it.\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mDo you want to investigate the hut? If so, type LITTLEHUT.\nTo ignore the little house and continue "
+          "down the path, type CONTINUE.\x1B[23m\n")
+
+    choice = input("What do you wish to do? (LITTLEHUT or CONTINUE): ").lower().strip()
+    while True:
+        if choice == "littlehut":
+            little_hut()
+            break
+        elif choice == "continue":
+            what_awaits()
+            break
+        else:
+            choice = input("Choose either LITTLEHUT or CONTINUE: ").lower().strip()
+
+
+def little_hut():
+    clear()
+    print("- LITTLEHUT -\n")
+    sleep(2)
+    print("You approach the little hut that sits to the side of the forest path.\nIt is well made, if a little "
+          "dilapidated, and covered in vines and creepers.\n\nCautiously you approach the door, and slowly reach for "
+          "the handle...\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mDo you want to check for traps? Roll perception, by typing TRAP.\nTo press on, type "
+          "CONTINUE.\x1B[23m\n")
+
+    choice = input("What do you wish to do? (TRAP or CONTINUE): ").lower().strip()
+    while True:
+        if choice == "trap":
+            little_hut_trap_checker()
+            break
+        elif choice == "continue":
+            well_damn()
+            break
+        else:
+            choice = input("Choose either TRAP or CONTINUE: ").lower().strip()
+
+
+def little_hut_trap_checker():
+    trap_dc = int(15)
+    if PC.perception_check(character) >= trap_dc:
+        print("\nYou rolled " + str(PC.perception_check(character)) + " for your perception check!")
+        press_to_continue()
+        hut_traps()
+    else:
+        print("\nYou rolled " + str(PC.perception_check(character)) + " for your perception check!"
+                                                                      "\nWhat could go wrong?")
+        well_damn()
+
+
+def hut_traps():
+    clear()
+    print("- HUTTRAPS -\n")
+    sleep(2)
+    print("You search all around the door frame, and the ground, but cannot find \nanything that looks like a trap "
+          "here. Cautiously you put your hand on\nthe door handle and quietly push down...\n\n\n")
+    press_to_continue()
+    cabin_entry()
+
+
+def well_damn():
+    clear()
+    print("- WELLDAMN -\n")
+    sleep(2)
+    print("Try as you might, you cannot detect anything that looks like a trap around this door.\nShrugging, "
+          "you reach for the door handle, turn it, and gently push the door inwards.\n\n\n")
+    press_to_continue()
+    cabin_entry()
+
+
+def cabin_entry():
+    clear()
+    print("- CABINENTRY -\n")
+    sleep(2)
+    print("You cautiously edge inside the cabin, looking around. It appears empty, even though\na crackling fire "
+          "burns in the hearth. There is a strange smell in here...\n\nSuddenly you feel something press against your "
+          "skull, as if a giant\ninvisible hand were crushing it! You resist as best you can,\nbut the force is "
+          "overwhelming. Within moments, you have blacked out.\n\nYou wake at what seems like many hours later.\nIt "
+          "is dark inside the room, probably night-time, and the room is empty.\n\n\n")
+    press_to_continue()
+    inducted()
+
+
+def inducted():
+    clear()
+    print("- INDUCTED -\n")
+    sleep(2)
+    print("Within the cabin there is a kind of burnt smell, like smouldering embers,\nand the room has only the most "
+          "basic furniture. A table, a couple of chairs, a fireplace...\n\nSuddenly your heart stops. In the "
+          "darkness, you see a figure, standing against\none of the walls, completely silent, watching you. A tall "
+          "figure, and dressed\nall in armour. As you watch, this figure begins to glow, red in the darkness,"
+          "\nand you see that it is in fact a knight! A sinister-looking tower of a Knight,\nholding a huge "
+          "greatsword that shimmers with an unearthly radiance.\n\nThe Death Knight?\n\n\n")
+    press_to_continue()
+    clear()
+    print("- INDUCTED -\n")
+    print("Feeling a cold sweat break out on your brow, you feel for your weapon...\nNo, that’s gone, as are all your "
+          "supplies.\n\n“Do not bother searching for your equipment, mortal,” a voice booms... it must be\nthe "
+          "Knight’s although it seems to come from all around you rather than from his direction.\n\n“Listen mortal, "
+          "and listen carefully!” the voice booms again.\n“I have a task for you. There is a knight who claims "
+          "ownership over this forest,\na warrior who, like myself, is not of this realmmmm.....” A chill travels up "
+          "your spine.\n\nThe voice is deep, booming, but hollow and devoid of life.\nAt least now you know you’re "
+          "not speaking to the Death Knight. Who could this be then?\n\n\n")
+    press_to_continue()
+    clear()
+    print("- INDUCTED -\n")
+    print("“My followers call me the Blood Night of Kiaransalee. I am a loyal follower of Kiaransalee,\nthe Dark "
+          "Goddess, Enemy of Lolth and Orcus, The Vengeful Banshee!”\n\nThese names make your blood run cold. You had "
+          "thought that the Cult of Kiaransalee\nwas long dead. Their deeds are detailed in ancient histories, "
+          "and they are\nresponsible for numerous atrocities throughout the ages.\n\n“My followers and I will see the "
+          "Mother return to her former power...\nand we have chosen this Wood of Weathercote as the point of her "
+          "arrival.\nIt is aligned with the unseen stars and the nodes of power that exist in this land...\nit is a "
+          "small but potent place. “But this one who they call the Death Knight...\nHe must die, mortal. And you have "
+          "been chosen by the Goddess as the bringer of his demise!”\n\n\n")
+    press_to_continue()
+    clear()
+    print("- INDUCTED -\n")
+    print("Your spirits lift a little. Isn’t this your quest anyway?\nYou are about to voice agreement when the Blood "
+          "Knight adds,\n\n“And as reward, you will become my most exalted follower! My general, who shall\nstand "
+          "beside me in glory as we return the Goddess Kiaransalee to her\nrightful place as ruler of this "
+          "land!”\n\nThis part, you are not so much in agreeance with. You are stunned into silence.\nThe Blood "
+          "Knight continues.\n\n“You must leave this place now.” He walks forward, taking a couple of massive\nsteps "
+          "towards you, and red sparks skitter out from his feet as he walks.\n“Do not be afraid mortal. I am "
+          "Myrkbrood, made from the embers of the cremated dead.\nAnd this weapon is of the Myrk as well!”\n\nFrom "
+          "some unseen place the Blood Knight produces a long sword, glowing\nwith a red light, as if embers burn "
+          "inside it.\n\n“This is known as a Sword of the Goddess’s Wrath. You will use it to slay the\none known as "
+          "the Death Knight! And then, return it to me before the dawn.\nIf you refuse any part of this task, "
+          "my followers will pursue you to the\nends of the world! You shall live a cursed life, always\nlooking over "
+          "your shoulder. Are we in agreeance, mortal?”\n")
+    press_to_continue()
+    clear()
+    print("- INDUCTED -\n")
+    print("You take the sword in your hand. It pulsates with a volatile potency,\nand almost hurts to hold. The dark "
+          "energy runs up your arm and\nyou feel a little of it creep into your very soul.\n\n\n")
+    sleep(5)
+
+    print("What is your response to the Blood Knight?")
+    print("\x1B[3m“Hell yeah, sign me up!” Type DARKQUEST.\n“Aaahhh yeah, the first part of what you say, "
+          "I can do that.\nBut the whole becoming your general thing... Not so sure.” Type NEGOTIATE.\n“Do you know "
+          "what Blood Knight? Take your Sword of Whatever and stick it where the sun don’t shine!” Type "
+          "BALLSYMOVE\x1B[23m\n")
+
+    choice = input("What do you wish to answer? (DARKQUEST, NEGOTIATE or BALLSYMOVE): ").lower().strip()
+    while True:
+        if choice == "darkquest":
+            dark_quest()
+            break
+        elif choice == "negotiate":
+            negotiate()
+            break
+        elif choice == "ballsymove":
+            ballsy_move()
+        else:
+            choice = input("Choose either DARKQUEST, NEGOTIATE or BALLSYMOVE: ").lower().strip()
+
+
+def dark_quest():
+    clear()
+    print("- DARKQUEST -\n")
+    sleep(2)
+
+    global has_blood_knight_sword
+    has_blood_knight_sword = True
+
+    print("At these words, you hear a crackling sound, like logs moving in a fire,\nand through the Blood Knight’s "
+          "visor, you see the twisted shape of a hideous smile\nmade out in embers, like a thin line of fire. You "
+          "stare in horror.\n\n“Excellent, mortal! You have pleased me well. I would complete this task myself, "
+          "but until\nthe Goddess’s arrival I cannot risk standing in sunlight. As soon as Kiaransalee comes,"
+          "\nshe will grant me physical form. Then, for a time, I may roam free. Now go, fulfill your "
+          "destiny!!!”\n\n\n")
+    press_to_continue()
+    clear()
+    print("- DARKQUEST -\n")
+    print("You stand, and, as if in trance, walk from the cabin. There, in a small pile outside\nthe door, "
+          "are your belongings. You quickly check them: yes everything is there,\nincluding your provisions. You "
+          "shoulder your backpack, regaining some small\nmeasure of comfort, and look around, getting your bearings. "
+          "You wonder for a\nsecond if this was all a dream, but then you feel for your newly acquired sword...\nand "
+          "yes, it is still there. Quickly you turn, open the door, and peer inside again...\nbut the hut is now "
+          "empty. The Blood Knight is gone, and the table and chairs\nare overturned and covered in cobwebs and "
+          "dust.\n\nWhat?! What just happened?\n\n\n")
+    print("\x1B[3mYou now wield the Sword of the Goddess's Wrath!\n\x1B[23m\n")
+    press_to_continue()
+    what_awaits()
+
+
+def negotiate():
+    clear()
+    print("- NEGOTIATE -\n")
+    sleep(2)
+    print("The Blood Knight’s roar fills the room.\n\n“You will accept this quest, or you will die as all mortal "
+          "flesh dies,\non the end of my sword!”\n\nHe brings his greatsword underneath your chin. You try to move, "
+          "but you are frozen\non the spot,as if by magic. You don’t doubt his words,\nand you are unarmed. It seems "
+          "you have little choice.\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mIf you still voice your disapproval, type NOFEAR.\n“If you bow to this intimidating warrior and "
+          "accept his quest, type DARKQUEST\x1B[23m\n")
+
+    choice = input("What do you wish to do? (NOFEAR or DARKQUEST): ").lower().strip()
+    while True:
+        if choice == "nofear":
+            no_fear()
+            break
+        elif choice == "darkquest":
+            dark_quest()
+            break
+        else:
+            choice = input("Choose either NOFEAR or DARKQUEST: ").lower().strip()
+
+
+def no_fear():
+    clear()
+    print("- NOFEAR -\n")
+    sleep(2)
+    print("The Blood Knight keeps his blade levelled at your chin, malice seeping\nfrom every inch of his ruined, "
+          "infernal body. You try to move again, but\nare completely unable to. It seems you are held there with some "
+          "sort of spell.\nYou have heard of the Myrkbrood before, but to actually be faced\nwith one – that "
+          "isanother thing entirely.\n\n“You seem devoid of fear, traveller,” the Blood Knight growls.\n“Do I not "
+          "intimidate you? I am impressed. Such a soul as you will\nmake a perfect general. Now BOW, or DIE LIKE A "
+          "DOG!”\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mDo you bow, and accept the quest? If so, type DARKQUEST.\nOr do you still resist? "
+          "Type RESIST\x1B[23m\n")
+
+    choice = input("What do you wish to do? (DARKQUEST or RESIST): ").lower().strip()
+    while True:
+        if choice == "darkquest":
+            dark_quest()
+            break
+        elif choice == "resist":
+            resist()
+            break
+        else:
+            choice = input("Choose either DARKQUEST or RESIST: ").lower().strip()
+
+
+def resist():
+    clear()
+    print("- RESIST -\n")
+    sleep(2)
+    print("At your final words of defiance, the Blood Knight of Kiaransalee thrusts his blade forward.\n\n\n")
+    press_to_continue()
+
+    blood_knight_attack = int(dice.roll('1d20')) + 8
+
+    if blood_knight_attack >= PC.ac(character):
+        oh_well()
+    else:
+        run()
+
+
+def run():
+    clear()
+    print("- RUN -\n")
+    sleep(2)
+    print("It is all a blur, but somehow you avoid the killing blow!\nQuickly you get to your feet, now able to move, "
+          "and bolt for the door.\nYou hear loud cursing in Infernal as you pull the door shut behind you,"
+          "\nremembering that the Blood Knight said he couldn't walk in daylight. Yet.\nYour belongings are outside "
+          "the door, but in the confusion,\nyou left the magic sword behind!\n\n\n")
+    press_to_continue()
+    what_awaits()
+
+
+def ballsy_move():
+    clear()
+    print("- BALLSYMOVE -\n")
+    sleep(2)
+    print("There is a long, awkward silence, and you fear the worst.\nThen the Blood Knight throws his head back and "
+          "laughs uproariously,\nthe sound filling the room and nearly deafening you. You wince, covering your "
+          "ears.\nFinally he stops, and addresses you, leveling his greatsword under your chin.\nSuddenly you feel "
+          "paralyzed, as if by a spell.\n\n“You are very brave, traveller.You will make a perfect general for the "
+          "Goddess. Now BOW, or DIE LIKE A DOG!”\n\n\n")
+
+    print("OPTIONS:")
+    print("\x1B[3mDo you bow to the Blood Knight’s will? If so, type DARKQUEST.\nIf you still resist, "
+          "type RESIST\x1B[23m\n")
+
+    choice = input("What do you wish to do? (DARKQUEST or RESIST): ").lower().strip()
+    while True:
+        if choice == "darkquest":
+            dark_quest()
+            break
+        elif choice == "resist":
+            resist()
+            break
+        else:
+            choice = input("Choose either DARKQUEST or RESIST: ").lower().strip()
+
+
+def what_awaits():
+
+    global perception_check
+
+    if perception_check:
+        chance_roll()
+    else:
+        hold_that_thought()
+
+
+def chance_roll():
+
+    global stealth_check
+
+    if stealth_check:
+        good_chance = int(dice.roll('1d100')) + 10
+        if good_chance <= 33:
+            dry_bones()
+        elif 34 <= good_chance <= 65:
+            phantasm()
+        elif good_chance >= 66:
+            quiet_path()
+    else:
+        bad_chance = int(dice.roll('1d100'))
+        if bad_chance <= 33:
+            dry_bones()
+        elif 34 <= bad_chance <= 65:
+            phantasm()
+        elif bad_chance >= 66:
+            quiet_path()
 
 
 def death_check():
